@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_template_form_urbanstyle" model="ir.ui.view">
+        <field name="name">product.template.form.urbanstyle</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <field name="categ_id" position="after">
+                <field name="urbanstyle_is_raw_material"/>
+                <field name="urbanstyle_is_finished_product"/>
+                <field name="urbanstyle_min_stock" invisible="not urbanstyle_is_raw_material"/>
+                <field name="urbanstyle_low_stock" invisible="not urbanstyle_is_raw_material" readonly="1"/>
+                <field name="is_urbanstyle_demo" groups="base.group_no_one"/>
+            </field>
+        </field>
+    </record>
+</odoo>

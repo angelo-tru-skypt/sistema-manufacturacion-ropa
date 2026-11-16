@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_routing_workcenter_form_urbanstyle" model="ir.ui.view">
+        <field name="name">mrp.routing.workcenter.form.urbanstyle</field>
+        <field name="model">mrp.routing.workcenter</field>
+        <field name="inherit_id" ref="mrp.mrp_routing_workcenter_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group" position="after">
+                <group string="Proceso textil">
+                    <field name="is_pleating_operation"/>
+                </group>
+                <group string="Especificaciones de Plisado" invisible="not is_pleating_operation">
+                    <group>
+                        <field name="pleat_type"/>
+                        <field name="pleat_width_cm"/>
+                        <field name="pleat_distance_cm"/>
+                        <field name="pleat_count"/>
+                    </group>
+                    <group>
+                        <field name="fabric_type"/>
+                        <field name="fixation_method"/>
+                        <field name="technical_notes" placeholder="Instrucciones para la máquina y el operario..."/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_urbanstyle_products" model="ir.actions.act_window">
+        <field name="name">Productos textiles</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('urbanstyle_is_finished_product', '=', True)]</field>
+    </record>
+    <record id="action_urbanstyle_raw_materials" model="ir.actions.act_window">
+        <field name="name">Materias primas</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('urbanstyle_is_raw_material', '=', True)]</field>
+    </record>
+    <record id="action_urbanstyle_boms" model="ir.actions.act_window">
+        <field name="name">Listas de materiales</field>
+        <field name="res_model">mrp.bom</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[]</field>
+    </record>
+    <record id="action_urbanstyle_workcenters" model="ir.actions.act_window">
+        <field name="name">Centros de trabajo</field>
+        <field name="res_model">mrp.workcenter</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_urbanstyle_operations" model="ir.actions.act_window">
+        <field name="name">Operaciones de fabricación</field>
+        <field name="res_model">mrp.routing.workcenter</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_urbanstyle_productions" model="ir.actions.act_window">
+        <field name="name">Órdenes de fabricación</field>
+        <field name="res_model">mrp.production</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_urbanstyle_quality_checks" model="ir.actions.act_window">
+        <field name="name">Comprobaciones de calidad</field>
+        <field name="res_model">quality.check</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_urbanstyle_quality_points" model="ir.actions.act_window">
+        <field name="name">Puntos de control</field>
+        <field name="res_model">quality.point</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_urbanstyle_purchase_orders" model="ir.actions.act_window">
+        <field name="name">Compras</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_urbanstyle_suppliers" model="ir.actions.act_window">
+        <field name="name">Proveedores</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('supplier_rank', '&gt;', 0)]</field>
+    </record>
+    <record id="action_urbanstyle_sales" model="ir.actions.act_window">
+        <field name="name">Ventas</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_urbanstyle_root" name="URBANSTYLE RD" sequence="5"
+        groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator,urbanstyle_textile_demo.group_urbanstyle_quality_manager,urbanstyle_textile_demo.group_urbanstyle_warehouse"/>
+    <menuitem id="menu_urbanstyle_dashboard" name="Panel de control" parent="menu_urbanstyle_root"
+        action="action_urbanstyle_dashboard" sequence="5"/>
+    <menuitem id="menu_urbanstyle_products" name="Productos textiles" parent="menu_urbanstyle_root"
+        action="action_urbanstyle_products" sequence="10"/>
+    <menuitem id="menu_urbanstyle_raw_materials" name="Materias primas" parent="menu_urbanstyle_root"
+        action="action_urbanstyle_raw_materials" sequence="15"/>
+    <menuitem id="menu_urbanstyle_boms" name="Listas de materiales" parent="menu_urbanstyle_root"
+        action="action_urbanstyle_boms" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager" sequence="20"/>
+    <menuitem id="menu_urbanstyle_workcenters" name="Centros de trabajo" parent="menu_urbanstyle_root"
+        action="action_urbanstyle_workcenters" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager" sequence="25"/>
+    <menuitem id="menu_urbanstyle_operations" name="Operaciones de fabricación" parent="menu_urbanstyle_root"
+        action="action_urbanstyle_operations" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager" sequence="30"/>
+    <menuitem id="menu_urbanstyle_productions" name="Órdenes de fabricación" parent="menu_urbanstyle_root"
+        action="action_urbanstyle_productions" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator" sequence="35"/>
+    <menuitem id="menu_urbanstyle_workorders" name="Órdenes de trabajo" parent="menu_urbanstyle_root"
+        action="mrp.mrp_workorder_todo" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator" sequence="40"/>
+
+    <menuitem id="menu_urbanstyle_quality" name="Control de calidad" parent="menu_urbanstyle_root"
+        groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator,urbanstyle_textile_demo.group_urbanstyle_quality_manager" sequence="45"/>
+    <menuitem id="menu_urbanstyle_quality_checks" name="Comprobaciones" parent="menu_urbanstyle_quality"
+        action="action_urbanstyle_quality_checks" sequence="5"/>
+    <menuitem id="menu_urbanstyle_quality_points" name="Puntos de control" parent="menu_urbanstyle_quality"
+        action="action_urbanstyle_quality_points" sequence="10"/>
+
+    <menuitem id="menu_urbanstyle_inventory" name="Inventario" parent="menu_urbanstyle_root"
+        action="stock.stock_quant_action" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator,urbanstyle_textile_demo.group_urbanstyle_warehouse" sequence="50"/>
+    <menuitem id="menu_urbanstyle_purchases" name="Compras" parent="menu_urbanstyle_root"
+        action="action_urbanstyle_purchase_orders" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_warehouse" sequence="55"/>
+    <menuitem id="menu_urbanstyle_suppliers" name="Proveedores" parent="menu_urbanstyle_root"
+        action="action_urbanstyle_suppliers" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_warehouse" sequence="60"/>
+    <menuitem id="menu_urbanstyle_sales" name="Ventas" parent="menu_urbanstyle_root"
+        action="action_urbanstyle_sales" groups="urbanstyle_textile_demo.group_urbanstyle_admin" sequence="65"/>
+    <menuitem id="menu_urbanstyle_configuration" name="Configuración" parent="menu_urbanstyle_root"
+        groups="urbanstyle_textile_demo.group_urbanstyle_admin" sequence="90"/>
+    <menuitem id="menu_urbanstyle_demo_data" name="Cargar datos de demostración" parent="menu_urbanstyle_configuration"
+        action="action_demo_data_wizard" groups="urbanstyle_textile_demo.group_urbanstyle_admin" sequence="5"/>
+</odoo>

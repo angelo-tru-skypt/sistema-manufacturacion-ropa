@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_workorder_form_urbanstyle" model="ir.ui.view">
+        <field name="name">mrp.workorder.form.urbanstyle</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp.mrp_production_workorder_form_view_inherit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <field name="is_pleating_operation" invisible="1"/>
+            </xpath>
+            <xpath expr="//sheet/group[last()]" position="after">
+                <group string="Especificaciones de Plisado" invisible="not is_pleating_operation">
+                    <group>
+                        <field name="pleat_type"/>
+                        <field name="pleat_width_cm"/>
+                        <field name="pleat_distance_cm"/>
+                        <field name="pleat_count"/>
+                    </group>
+                    <group>
+                        <field name="fabric_type"/>
+                        <field name="fixation_method"/>
+                        <field name="technical_notes"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="mrp_workorder_tablet_form_urbanstyle" model="ir.ui.view">
+        <field name="name">mrp.workorder.tablet.form.urbanstyle</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp_workorder.mrp_workorder_view_form_tablet"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <field name="is_pleating_operation" invisible="1"/>
+            </xpath>
+            <xpath expr="//form/div[contains(@class, 'o_workorder_bar')][last()]" position="after">
+                <group string="Especificaciones de Plisado" invisible="not is_pleating_operation">
+                    <group>
+                        <field name="pleat_type" readonly="1"/>
+                        <field name="pleat_width_cm" readonly="1"/>
+                        <field name="pleat_distance_cm" readonly="1"/>
+                        <field name="pleat_count" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="fabric_type" readonly="1"/>
+                        <field name="fixation_method" readonly="1"/>
+                        <field name="technical_notes" readonly="1"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

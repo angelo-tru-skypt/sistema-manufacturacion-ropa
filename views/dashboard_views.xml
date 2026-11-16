@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_urbanstyle_dashboard_form" model="ir.ui.view">
+        <field name="name">urbanstyle.dashboard.form</field>
+        <field name="model">urbanstyle.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="UrbanStyle RD" create="0" delete="0">
+                <header>
+                    <button name="action_open_demo_wizard" type="object" string="Cargar datos de demostración" class="btn-primary" groups="urbanstyle_textile_demo.group_urbanstyle_admin"/>
+                    <button name="action_open_shop_floor" type="object" string="Abrir Taller (Shop Floor)" class="btn-secondary" groups="mrp_workorder.group_mrp_wo_shop_floor"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_pending_productions" type="object" class="oe_stat_button" icon="fa-clock-o">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="manufacturing_pending"/></span>
+                                <span class="o_stat_text">Órdenes pendientes</span>
+                            </div>
+                        </button>
+                        <button name="action_open_progress_productions" type="object" class="oe_stat_button" icon="fa-cogs">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="manufacturing_in_progress"/></span>
+                                <span class="o_stat_text">En producción</span>
+                            </div>
+                        </button>
+                        <button name="action_open_done_productions" type="object" class="oe_stat_button" icon="fa-check-circle">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="manufacturing_done"/></span>
+                                <span class="o_stat_text">Completadas</span>
+                            </div>
+                        </button>
+                        <button name="action_open_quality_checks" type="object" class="oe_stat_button" icon="fa-flask">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="quality_checks_pending"/></span>
+                                <span class="o_stat_text">Controles pendientes</span>
+                            </div>
+                        </button>
+                        <button name="action_open_low_stock_materials" type="object" class="oe_stat_button" icon="fa-exclamation-triangle">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="raw_materials_low"/></span>
+                                <span class="o_stat_text">Materias primas con stock bajo</span>
+                            </div>
+                        </button>
+                        <button name="action_open_finished_stock" type="object" class="oe_stat_button" icon="fa-shopping-bag">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="finished_stock_units"/></span>
+                                <span class="o_stat_text">Prendas disponibles</span>
+                            </div>
+                        </button>
+                    </div>
+                    <group string="Producción acumulada">
+                        <field name="produced_units" readonly="1"/>
+                    </group>
+                    <div class="text-muted">
+                        Indicadores conectados a órdenes, controles de calidad y existencias reales de la compañía activa.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_urbanstyle_dashboard" model="ir.actions.act_window">
+        <field name="name">Panel de control</field>
+        <field name="res_model">urbanstyle.dashboard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_urbanstyle_dashboard_form"/>
+        <field name="res_id" ref="urbanstyle_dashboard_main"/>
+    </record>
+</odoo>
