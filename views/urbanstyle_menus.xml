@@ -5,12 +5,14 @@
         <field name="res_model">product.template</field>
         <field name="view_mode">list,form</field>
         <field name="domain">[('urbanstyle_is_finished_product', '=', True)]</field>
+        <field name="context">{'default_urbanstyle_is_finished_product': True, 'default_urbanstyle_auto_price': True, 'default_is_storable': True, 'default_sale_ok': True, 'default_purchase_ok': False}</field>
     </record>
     <record id="action_urbanstyle_raw_materials" model="ir.actions.act_window">
         <field name="name">Materias primas</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">list,form</field>
         <field name="domain">[('urbanstyle_is_raw_material', '=', True)]</field>
+        <field name="context">{'default_urbanstyle_is_raw_material': True, 'default_is_storable': True, 'default_sale_ok': False, 'default_purchase_ok': True}</field>
     </record>
     <record id="action_urbanstyle_boms" model="ir.actions.act_window">
         <field name="name">Listas de materiales</field>
@@ -58,6 +60,31 @@
         <field name="name">Ventas</field>
         <field name="res_model">sale.order</field>
         <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_urbanstyle_products_list_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="urbanstyle_finished_product_list"/>
+        <field name="act_window_id" ref="action_urbanstyle_products"/>
+    </record>
+    <record id="action_urbanstyle_products_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="product_template_form_urbanstyle"/>
+        <field name="act_window_id" ref="action_urbanstyle_products"/>
+    </record>
+    <record id="action_urbanstyle_raw_materials_list_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="urbanstyle_raw_material_list"/>
+        <field name="act_window_id" ref="action_urbanstyle_raw_materials"/>
+    </record>
+    <record id="action_urbanstyle_raw_materials_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="product_template_form_urbanstyle"/>
+        <field name="act_window_id" ref="action_urbanstyle_raw_materials"/>
     </record>
 
     <menuitem id="menu_urbanstyle_root" name="URBANSTYLE RD" sequence="5"

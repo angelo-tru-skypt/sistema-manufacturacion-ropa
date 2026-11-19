@@ -1,17 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Ficha enfocada en prendas y materias primas del flujo UrbanStyle. -->
     <record id="product_template_form_urbanstyle" model="ir.ui.view">
-        <field name="name">product.template.form.urbanstyle</field>
+        <field name="name">product.template.form.urbanstyle.business</field>
         <field name="model">product.template</field>
-        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="inherit_id" eval="False"/>
+        <field name="mode">primary</field>
         <field name="arch" type="xml">
-            <field name="categ_id" position="after">
-                <field name="urbanstyle_is_raw_material"/>
-                <field name="urbanstyle_is_finished_product"/>
-                <field name="urbanstyle_min_stock" invisible="not urbanstyle_is_raw_material"/>
-                <field name="urbanstyle_low_stock" invisible="not urbanstyle_is_raw_material" readonly="1"/>
-                <field name="is_urbanstyle_demo" groups="base.group_no_one"/>
-            </field>
+            <form string="Producto textil">
+                <sheet>
+                    <field name="urbanstyle_is_raw_material" invisible="1"/>
+                    <field name="urbanstyle_is_finished_product" invisible="1"/>
+                    <field name="is_urbanstyle_demo" invisible="1"/>
+                    <field name="active" invisible="1"/>
+                    <field name="is_storable" invisible="1"/>
+                    <field name="image_1920" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name" string="Nombre del producto"/>
+                        <h1>
+                            <field name="name" placeholder="Ej. Falda plisada clásica"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Identificación">
+                            <field name="default_code" placeholder="Referencia interna"/>
+                            <field name="categ_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Unidad y precio">
+                            <field name="uom_id"/>
+                            <field name="standard_price" string="Costo unitario"
+                                invisible="not urbanstyle_is_raw_material"/>
+                            <field name="list_price" string="Precio de venta"
+                                invisible="not urbanstyle_is_finished_product"
+                                readonly="urbanstyle_auto_price"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Fabricación" name="urbanstyle_manufacturing"
+                            invisible="not urbanstyle_is_finished_product">
+                            <div class="alert alert-info" role="alert">
+                                Define los materiales y las operaciones necesarios para confeccionar una unidad. No podrás confirmar la fabricación ni vender esta prenda hasta completar el kit. Para calcular el precio automáticamente, cada área debe tener un costo por hora mayor que cero.
+                            </div>
+                            <field name="urbanstyle_kit_bom_ids"
+                                context="{'default_product_tmpl_id': id, 'default_product_qty': 1, 'default_type': 'normal'}"
+                                mode="list,form">
+                                <list>
+                                    <field name="product_qty"/>
+                                    <field name="product_uom_id"/>
+                                    <field name="company_id" groups="base.group_multi_company"/>
+                                </list>
+                            </field>
+                            <group string="Costo y precio">
+                                <group>
+                                    <field name="urbanstyle_auto_price"/>
+                                    <field name="urbanstyle_margin_pct"
+                                        invisible="not urbanstyle_auto_price"/>
+                                    <field name="urbanstyle_material_cost" readonly="1"/>
+                                    <field name="urbanstyle_labor_cost" readonly="1"/>
+                                    <field name="urbanstyle_unit_cost" readonly="1"/>
+                                    <field name="urbanstyle_calculated_sale_price" readonly="1"
+                                        invisible="not urbanstyle_auto_price"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Ventas" name="urbanstyle_sales"
+                            invisible="not urbanstyle_is_finished_product">
+                            <group>
+                                <group string="Presentaciones">
+                                    <field name="urbanstyle_pack_quantity"/>
+                                    <field name="urbanstyle_box_quantity"/>
+                                    <field name="uom_ids" widget="many2many_tags" readonly="1"/>
+                                </group>
+                                <group string="Descripción para ventas">
+                                    <field name="description_sale" nolabel="1"
+                                        placeholder="Detalles que deben aparecer en la cotización..."/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Variantes" name="urbanstyle_variants"
+                            invisible="not urbanstyle_is_finished_product">
+                            <field name="attribute_line_ids"
+                                context="{'default_product_tmpl_id': id}">
+                                <list editable="bottom">
+                                    <field name="attribute_id"/>
+                                    <field name="value_ids" widget="many2many_tags"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Materia prima" name="urbanstyle_raw_material"
+                            invisible="not urbanstyle_is_raw_material">
+                            <group>
+                                <group string="Especificación textil">
+                                    <field name="urbanstyle_material_kind"/>
+                                    <field name="urbanstyle_fabric_width_in"
+                                        invisible="urbanstyle_material_kind != 'fabric'"/>
+                                    <field name="urbanstyle_min_stock"/>
+                                    <field name="urbanstyle_low_stock" readonly="1"/>
+                                </group>
+                                <group string="Compra">
+                                    <field name="description_purchase" nolabel="1"
+                                        placeholder="Instrucciones para solicitar este insumo..."/>
+                                </group>
+                            </group>
+                            <field name="seller_ids" context="{'default_product_tmpl_id': id}">
+                                <list editable="bottom">
+                                    <field name="partner_id"/>
+                                    <field name="product_uom_id" string="Unidad de compra"/>
+                                    <field name="currency_id"/>
+                                    <field name="min_qty"/>
+                                    <field name="price"/>
+                                    <field name="delay"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="urbanstyle_finished_product_list" model="ir.ui.view">
+        <field name="name">product.template.list.urbanstyle.finished</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <list string="Prendas">
+                <field name="name"/>
+                <field name="default_code" optional="show"/>
+                <field name="categ_id" optional="hide"/>
+                <field name="uom_id" string="Unidad"/>
+                <field name="list_price" string="Precio de venta"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="urbanstyle_raw_material_list" model="ir.ui.view">
+        <field name="name">product.template.list.urbanstyle.raw.material</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <list string="Materias primas">
+                <field name="name"/>
+                <field name="default_code" optional="show"/>
+                <field name="urbanstyle_material_kind"/>
+                <field name="uom_id" string="Unidad de inventario"/>
+                <field name="standard_price" string="Costo unitario"/>
+                <field name="urbanstyle_min_stock"/>
+                <field name="urbanstyle_low_stock" widget="boolean_toggle"/>
+            </list>
         </field>
     </record>
 </odoo>

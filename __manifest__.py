@@ -1,7 +1,7 @@
 {
     "name": "UrbanStyle RD - Demo textil",
     "summary": "Flujo demostrativo textil sobre las aplicaciones nativas de Odoo",
-    "version": "19.0.1.0.0",
+    "version": "19.0.3.0.0",
     "category": "Manufacturing/Manufacturing",
     "author": "UrbanStyle RD",
     "license": "LGPL-3",
@@ -9,6 +9,7 @@
         "base",
         "mail",
         "product",
+        "uom",
         "stock",
         "purchase",
         "sale_management",
@@ -20,6 +21,7 @@
     "data": [
         "security/urbanstyle_security.xml",
         "security/ir.model.access.csv",
+        "data/urbanstyle_units.xml",
         "data/urbanstyle_dashboard_data.xml",
         "views/product_template_views.xml",
         "views/mrp_routing_views.xml",

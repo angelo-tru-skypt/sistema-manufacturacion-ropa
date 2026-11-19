@@ -1,6 +1,6 @@
 # UrbanStyle RD — demostración textil para Odoo 19 Enterprise
 
-Este addon extiende los modelos nativos de Odoo para una demostración de fabricación textil. Usa ORM y registros persistentes; no reemplaza Manufactura, Inventario, Compras, Ventas ni Calidad.
+Este addon extiende los modelos nativos de Odoo para una demostración de fabricación textil. Prepara la fórmula de materiales de cada prenda, convierte presentaciones de venta a unidades de inventario y calcula precios con materiales, mano de obra y margen. Usa ORM y registros persistentes; no reemplaza Manufactura, Inventario, Compras, Ventas ni Calidad.
 
 Consulta [GUIA_DE_USO.md](GUIA_DE_USO.md) para la guía operativa completa, los perfiles, el recorrido de fabricación y las recomendaciones de solución de problemas.
 
@@ -22,7 +22,7 @@ La carga se puede repetir: identifica los datos del demo por el marcador UrbanSt
 
 Dependencias directas declaradas en el manifest:
 
-- `base`, `mail`
+- `base`, `mail`, `uom`
 - `product`, `stock`
 - `purchase`, `sale_management`
 - `mrp`, `mrp_workorder`

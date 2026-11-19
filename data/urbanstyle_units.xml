@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="uom_urbanstyle_yard" model="uom.uom">
+            <field name="name">Yarda (yd)</field>
+            <field name="relative_uom_id" ref="uom.product_uom_meter"/>
+            <field name="relative_factor">0.9144</field>
+        </record>
+        <record id="uom_urbanstyle_thread_cone_600_yards" model="uom.uom">
+            <field name="name">Cono de hilo (600 yd)</field>
+            <field name="relative_uom_id" ref="urbanstyle_textile_demo.uom_urbanstyle_yard"/>
+            <field name="relative_factor">600</field>
+        </record>
+    </data>
+</odoo>

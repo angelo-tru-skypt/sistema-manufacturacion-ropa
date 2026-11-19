@@ -139,6 +139,94 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
         self._mark_result(counts, "Puntos de control de calidad", True)
         return point
 
+    def _ensure_demo_recipe(
+        self,
+        template,
+        raw_materials,
+        component_specs,
+        operation_specs,
+        workcenters,
+        warehouse,
+        unit,
+        company,
+        counts,
+    ):
+        template._ensure_urbanstyle_material_kit()
+        bom = self.env["mrp.bom"].search(
+            [
+                ("product_tmpl_id", "=", template.id),
+                ("product_id", "=", False),
+                ("type", "=", "normal"),
+                ("company_id", "in", [False, company.id]),
+            ],
+            order="urbanstyle_is_material_kit desc, sequence, id",
+            limit=1,
+        )
+        bom_values = {
+            "product_tmpl_id": template.id,
+            "product_qty": 1.0,
+            "product_uom_id": unit.id,
+            "type": "normal",
+            "company_id": company.id,
+            "picking_type_id": warehouse.manu_type_id.id,
+            "allow_operation_dependencies": True,
+            "is_urbanstyle_demo": True,
+            "urbanstyle_is_material_kit": True,
+        }
+        if not bom:
+            bom = self.env["mrp.bom"].with_company(company).create(bom_values)
+            self._mark_result(counts, "Kits de materiales", True)
+        else:
+            bom.write(
+                {
+                    "is_urbanstyle_demo": True,
+                    "urbanstyle_is_material_kit": True,
+                    "picking_type_id": bom.picking_type_id.id or warehouse.manu_type_id.id,
+                    "allow_operation_dependencies": True,
+                }
+            )
+            self._mark_result(counts, "Kits de materiales", False)
+
+        if not bom.bom_line_ids:
+            bom.write(
+                {
+                    "bom_line_ids": [
+                        Command.create(
+                            {
+                                "product_id": raw_materials[name].product_variant_id.id,
+                                "product_qty": quantity,
+                                "product_uom_id": uom.id,
+                            }
+                        )
+                        for name, quantity, uom in component_specs
+                    ]
+                }
+            )
+
+        previous_operation = False
+        for sequence, spec in enumerate(operation_specs, start=1):
+            operation = bom.operation_ids.filtered(lambda item: item.name == spec["name"])[:1]
+            if not operation:
+                operation = self.env["mrp.routing.workcenter"].with_company(company).create(
+                    {
+                        "name": spec["name"],
+                        "sequence": sequence * 10,
+                        "workcenter_id": workcenters[spec["workcenter"]].id,
+                        "time_mode": "manual",
+                        "time_cycle_manual": spec["minutes"],
+                        "technical_notes": spec["notes"],
+                        "bom_id": bom.id,
+                    }
+                )
+                self._mark_result(counts, "Operaciones de fabricación", True)
+            else:
+                self._mark_result(counts, "Operaciones de fabricación", False)
+
+            if previous_operation and previous_operation not in operation.blocked_by_operation_ids:
+                operation.blocked_by_operation_ids = [Command.link(previous_operation.id)]
+            previous_operation = operation
+        return bom
+
     def _configure_pos_products(self, finished_templates):
         pos_installed = self.env["ir.module.module"].sudo().search_count(
             [("name", "=", "point_of_sale"), ("state", "=", "installed")]
@@ -167,6 +255,7 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
         # group_mrp_workorder_dependencies; allow_operation_dependencies is a BoM field.
         self.env["res.config.settings"].sudo().create(
             {
+                "group_uom": True,
                 "group_mrp_routings": True,
                 "group_mrp_workorder_dependencies": True,
             }
@@ -179,6 +268,9 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
         unit = self.env.ref("uom.product_uom_unit", raise_if_not_found=False)
         if not meter or not unit:
             raise UserError(_("Las unidades de medida estándar Metro y Unidad deben estar disponibles."))
+        yard = self.env.ref("urbanstyle_textile_demo.uom_urbanstyle_yard")
+        thread_cone = self.env.ref("urbanstyle_textile_demo.uom_urbanstyle_thread_cone_600_yards")
+        dozen = self.env.ref("uom.product_uom_dozen")
 
         supplier_specs = [
             "Textiles del Caribe",
@@ -206,6 +298,8 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
                 "initial": 240.0,
                 "minimum": 60.0,
                 "supplier": "Textiles del Caribe",
+                "purchase_uom": yard,
+                "material_kind": "fabric",
             },
             {
                 "name": "Tela de algodón",
@@ -216,6 +310,20 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
                 "initial": 180.0,
                 "minimum": 45.0,
                 "supplier": "Distribuidora Textil RD",
+                "purchase_uom": yard,
+                "material_kind": "fabric",
+            },
+            {
+                "name": "Tela de mezclilla (denim)",
+                "code": "US-RM-DENIM",
+                "uom": meter,
+                "price": 230.0,
+                "cost": 230.0,
+                "initial": 180.0,
+                "minimum": 45.0,
+                "supplier": "Textiles del Caribe",
+                "purchase_uom": yard,
+                "material_kind": "fabric",
             },
             {
                 "name": "Hilo de costura",
@@ -226,6 +334,8 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
                 "initial": 9000.0,
                 "minimum": 2000.0,
                 "supplier": "Distribuidora Textil RD",
+                "purchase_uom": thread_cone,
+                "material_kind": "thread",
             },
             {
                 "name": "Cierres",
@@ -236,6 +346,8 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
                 "initial": 400.0,
                 "minimum": 80.0,
                 "supplier": "Accesorios y Confecciones",
+                "purchase_uom": unit,
+                "material_kind": "accessory",
             },
             {
                 "name": "Botones",
@@ -246,6 +358,8 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
                 "initial": 1600.0,
                 "minimum": 300.0,
                 "supplier": "Accesorios y Confecciones",
+                "purchase_uom": dozen,
+                "material_kind": "button",
             },
             {
                 "name": "Entretela",
@@ -256,6 +370,8 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
                 "initial": 140.0,
                 "minimum": 35.0,
                 "supplier": "Textiles del Caribe",
+                "purchase_uom": yard,
+                "material_kind": "accessory",
             },
             {
                 "name": "Etiquetas de marca",
@@ -266,6 +382,8 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
                 "initial": 700.0,
                 "minimum": 150.0,
                 "supplier": "Accesorios y Confecciones",
+                "purchase_uom": unit,
+                "material_kind": "accessory",
             },
         ]
         raw_materials = {}
@@ -286,12 +404,19 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
                     "standard_price": spec["cost"],
                     "urbanstyle_is_raw_material": True,
                     "urbanstyle_is_finished_product": False,
+                    "urbanstyle_material_kind": spec["material_kind"],
                     "urbanstyle_min_stock": spec["minimum"],
                     "seller_ids": [
                         Command.create(
                             {
                                 "partner_id": supplier.id,
-                                "price": spec["price"],
+                                "product_uom_id": spec["purchase_uom"].id,
+                                "price": spec["price"]
+                                * spec["purchase_uom"]._compute_quantity(
+                                    1.0,
+                                    spec["uom"],
+                                    round=False,
+                                ),
                                 "min_qty": 1.0,
                                 "company_id": company.id,
                             }
@@ -303,6 +428,21 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
                 default_code=spec["code"],
             )
             raw_materials[spec["name"]] = template
+            if not created:
+                template.write({"urbanstyle_material_kind": spec["material_kind"]})
+                for seller in template.seller_ids.filtered(lambda line: line.partner_id == supplier):
+                    source_uom = seller.product_uom_id or template.uom_id
+                    price_per_inventory_unit = source_uom._compute_price(seller.price, template.uom_id)
+                    purchase_price = template.uom_id._compute_price(
+                        price_per_inventory_unit,
+                        spec["purchase_uom"],
+                    )
+                    seller.write(
+                        {
+                            "product_uom_id": spec["purchase_uom"].id,
+                            "price": purchase_price,
+                        }
+                    )
             if created:
                 self._ensure_initial_stock(template, spec["initial"], warehouse.lot_stock_id, result_counts)
 
@@ -315,6 +455,7 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
             },
             {"name": "Camiseta básica", "prefix": "CAM", "price": 890.0, "cost": 240.0},
             {"name": "Pantalón recto", "prefix": "PAN", "price": 2190.0, "cost": 650.0},
+            {"name": "Jean clásico", "prefix": "JEA", "price": 2490.0, "cost": 760.0},
         ]
         finished_templates = {}
         for spec in finished_specs:
@@ -363,6 +504,10 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
                 # No edits are made to pre-existing demo records.
                 pass
 
+        for template in finished_templates.values():
+            template._ensure_urbanstyle_material_kit()
+            template._ensure_urbanstyle_sales_uoms()
+
         self._configure_pos_products(list(finished_templates.values()))
 
         workcenter_specs = [
@@ -401,14 +546,191 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
             )
             workcenters[name] = workcenter
 
+        # Starter recipes are examples; adjust each quantity and cycle time to
+        # the actual pattern and production method before using live costing.
+        starter_recipes = {
+            "Camiseta básica": (
+                [
+                    ("Tela de algodón", 1.25, meter),
+                    ("Hilo de costura", 45.0, meter),
+                    ("Etiquetas de marca", 1.0, unit),
+                ],
+                [
+                    {
+                        "name": "Inspección de tela para camiseta",
+                        "workcenter": "Área de inspección",
+                        "minutes": 4.0,
+                        "notes": "Revisar tono, defectos y elasticidad del tejido.",
+                    },
+                    {
+                        "name": "Corte de camiseta",
+                        "workcenter": "Área de corte",
+                        "minutes": 12.0,
+                        "notes": "Trazar las piezas de la camiseta y cortar respetando el hilo del tejido.",
+                    },
+                    {
+                        "name": "Costura de camiseta",
+                        "workcenter": "Área de costura",
+                        "minutes": 26.0,
+                        "notes": "Unir hombros y costados, montar mangas y terminar el cuello.",
+                    },
+                    {
+                        "name": "Acabados de camiseta",
+                        "workcenter": "Área de acabados",
+                        "minutes": 8.0,
+                        "notes": "Revisar dobladillos, retirar hilos sueltos y colocar etiqueta.",
+                    },
+                    {
+                        "name": "Inspección final de camiseta",
+                        "workcenter": "Área de inspección",
+                        "minutes": 5.0,
+                        "notes": "Revisar medidas, costuras, limpieza y presentación.",
+                    },
+                ],
+            ),
+            "Pantalón recto": (
+                [
+                    ("Tela de algodón", 1.65, meter),
+                    ("Hilo de costura", 65.0, meter),
+                    ("Cierres", 1.0, unit),
+                    ("Botones", 1.0, unit),
+                    ("Entretela", 0.15, meter),
+                    ("Etiquetas de marca", 1.0, unit),
+                ],
+                [
+                    {
+                        "name": "Inspección de tela para pantalón",
+                        "workcenter": "Área de inspección",
+                        "minutes": 5.0,
+                        "notes": "Revisar metraje, tono y defectos antes del corte.",
+                    },
+                    {
+                        "name": "Corte de pantalón recto",
+                        "workcenter": "Área de corte",
+                        "minutes": 18.0,
+                        "notes": "Cortar delanteros, traseros, pretina y vistas según el patrón.",
+                    },
+                    {
+                        "name": "Costura de pantalón recto",
+                        "workcenter": "Área de costura",
+                        "minutes": 36.0,
+                        "notes": "Unir piernas, montar cierre y pretina, y colocar botón.",
+                    },
+                    {
+                        "name": "Acabados de pantalón recto",
+                        "workcenter": "Área de acabados",
+                        "minutes": 10.0,
+                        "notes": "Planchar, revisar dobladillos y colocar etiqueta.",
+                    },
+                    {
+                        "name": "Inspección final de pantalón recto",
+                        "workcenter": "Área de inspección",
+                        "minutes": 6.0,
+                        "notes": "Comprobar medidas, cierre, botón y costuras.",
+                    },
+                ],
+            ),
+            "Jean clásico": (
+                [
+                    ("Tela de mezclilla (denim)", 1.80, meter),
+                    ("Hilo de costura", 80.0, meter),
+                    ("Cierres", 1.0, unit),
+                    ("Botones", 1.0, unit),
+                    ("Entretela", 0.25, meter),
+                    ("Etiquetas de marca", 1.0, unit),
+                ],
+                [
+                    {
+                        "name": "Inspección de denim",
+                        "workcenter": "Área de inspección",
+                        "minutes": 5.0,
+                        "notes": "Revisar tono, defectos, metraje y estabilidad de la mezclilla.",
+                    },
+                    {
+                        "name": "Corte de jean",
+                        "workcenter": "Área de corte",
+                        "minutes": 20.0,
+                        "notes": "Cortar las piezas del jean según el patrón y orientar correctamente el tejido.",
+                    },
+                    {
+                        "name": "Costura y pespuntes de jean",
+                        "workcenter": "Área de costura",
+                        "minutes": 45.0,
+                        "notes": "Unir piezas, cerrar costados y tiro, y realizar pespuntes de refuerzo.",
+                    },
+                    {
+                        "name": "Cierre y botón de jean",
+                        "workcenter": "Área de costura",
+                        "minutes": 12.0,
+                        "notes": "Montar cierre, pretina y botón según el diseño.",
+                    },
+                    {
+                        "name": "Acabados de jean",
+                        "workcenter": "Área de acabados",
+                        "minutes": 12.0,
+                        "notes": "Revisar dobladillo, retirar hilos y colocar etiqueta.",
+                    },
+                    {
+                        "name": "Inspección final de jean",
+                        "workcenter": "Área de inspección",
+                        "minutes": 6.0,
+                        "notes": "Verificar medidas, cierre, botón, costuras y presentación.",
+                    },
+                ],
+            ),
+        }
+        for product_name, (component_specs, operation_specs) in starter_recipes.items():
+            self._ensure_demo_recipe(
+                finished_templates[product_name],
+                raw_materials,
+                component_specs,
+                operation_specs,
+                workcenters,
+                warehouse,
+                unit,
+                company,
+                result_counts,
+            )
+
         skirt = finished_templates["Falda plisada clásica"]
+        skirt._ensure_urbanstyle_material_kit()
         bom = self.env["mrp.bom"].search(
             [
-                ("is_urbanstyle_demo", "=", True),
                 ("product_tmpl_id", "=", skirt.id),
+                ("product_id", "=", False),
+                ("type", "=", "normal"),
+                ("company_id", "in", [False, company.id]),
             ],
+            order="urbanstyle_is_material_kit desc, sequence, id",
             limit=1,
         )
+        bom_line_values = [
+            {
+                "product_id": raw_materials["Tela de poliéster"].product_variant_id.id,
+                "product_qty": 1.60,
+                "product_uom_id": meter.id,
+            },
+            {
+                "product_id": raw_materials["Hilo de costura"].product_variant_id.id,
+                "product_qty": 60.0,
+                "product_uom_id": meter.id,
+            },
+            {
+                "product_id": raw_materials["Cierres"].product_variant_id.id,
+                "product_qty": 1.0,
+                "product_uom_id": unit.id,
+            },
+            {
+                "product_id": raw_materials["Entretela"].product_variant_id.id,
+                "product_qty": 0.20,
+                "product_uom_id": meter.id,
+            },
+            {
+                "product_id": raw_materials["Etiquetas de marca"].product_variant_id.id,
+                "product_qty": 1.0,
+                "product_uom_id": unit.id,
+            },
+        ]
         if not bom:
             bom_values = {
                 "product_tmpl_id": skirt.id,
@@ -419,47 +741,22 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
                 "picking_type_id": warehouse.manu_type_id.id,
                 "allow_operation_dependencies": True,
                 "is_urbanstyle_demo": True,
-                "bom_line_ids": [
-                    Command.create(
-                        {
-                            "product_id": raw_materials["Tela de poliéster"].product_variant_id.id,
-                            "product_qty": 1.60,
-                            "product_uom_id": meter.id,
-                        }
-                    ),
-                    Command.create(
-                        {
-                            "product_id": raw_materials["Hilo de costura"].product_variant_id.id,
-                            "product_qty": 60.0,
-                            "product_uom_id": meter.id,
-                        }
-                    ),
-                    Command.create(
-                        {
-                            "product_id": raw_materials["Cierres"].product_variant_id.id,
-                            "product_qty": 1.0,
-                            "product_uom_id": unit.id,
-                        }
-                    ),
-                    Command.create(
-                        {
-                            "product_id": raw_materials["Entretela"].product_variant_id.id,
-                            "product_qty": 0.20,
-                            "product_uom_id": meter.id,
-                        }
-                    ),
-                    Command.create(
-                        {
-                            "product_id": raw_materials["Etiquetas de marca"].product_variant_id.id,
-                            "product_qty": 1.0,
-                            "product_uom_id": unit.id,
-                        }
-                    ),
-                ],
+                "urbanstyle_is_material_kit": True,
+                "bom_line_ids": [Command.create(values) for values in bom_line_values],
             }
             bom = self.env["mrp.bom"].with_company(company).create(bom_values)
             self._mark_result(result_counts, "Listas de materiales", True)
         else:
+            bom.write(
+                {
+                    "is_urbanstyle_demo": True,
+                    "urbanstyle_is_material_kit": True,
+                    "picking_type_id": bom.picking_type_id.id or warehouse.manu_type_id.id,
+                    "allow_operation_dependencies": True,
+                }
+            )
+            if not bom.bom_line_ids:
+                bom.write({"bom_line_ids": [Command.create(values) for values in bom_line_values]})
             self._mark_result(result_counts, "Listas de materiales", False)
 
         operation_specs = [

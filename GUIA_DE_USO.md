@@ -4,15 +4,21 @@
 
 UrbanStyle RD es una capa demostrativa sobre las aplicaciones nativas de Odoo. Productos, variantes, existencias, compras, listas de materiales, órdenes de fabricación, órdenes de trabajo, controles de calidad y ventas se guardan en los modelos normales de Odoo. El addon agrega los campos textiles, un tablero y un asistente que carga registros de ejemplo.
 
-El flujo que puedes presentar es:
+El flujo recomendado es:
 
-**Compra y recepción → inspección de entrada → planificación → fabricación por operaciones → controles de calidad → inventario de prendas → venta.**
+1. **Preparar el catálogo:** crear cada prenda, sus variantes y el kit con los materiales y cantidades por prenda; definir las áreas, tiempos y margen.
+2. **Comprar insumos:** usar la presentación indicada por cada suplidor (yardas, conos, docenas o unidades) y recibir materiales con inspección de entrada. Odoo convierte la recepción a la unidad base del inventario.
+3. **Fabricar:** abrir una orden, seleccionar la prenda y revisar la fórmula que se carga automáticamente. Ajustar el lote y, si hace falta, sus cantidades de componentes antes de reservarlos.
+4. **Registrar el trabajo:** completar las operaciones en sus áreas y resolver los controles de calidad de cada etapa.
+5. **Cerrar producción:** validar la orden para registrar las prendas terminadas en inventario y el consumo de materiales.
+6. **Vender:** seleccionar la variante y la presentación (unidad, paquete o caja). Confirmar la orden reserva stock; validar la entrega descuenta las unidades del inventario.
+7. **Mantener costos:** actualizar los costos de materiales, tiempos y centros de trabajo; el precio de venta se recalcula con el margen configurado mientras la actualización automática siga activa.
 
 La carga inicial crea stock de materias primas mediante un ajuste de inventario estándar, pero no crea una orden de compra ni una recepción. Estas se pueden crear en vivo desde Odoo.
 
 ## 2. Requisitos y acceso
 
-El módulo principal es `urbanstyle_textile_demo`. Declara como dependencias `base`, `mail`, `product`, `stock`, `purchase`, `sale_management`, `mrp`, `mrp_workorder`, `quality_control` y `quality_mrp`. Odoo instala las dependencias al instalar el módulo. `point_of_sale` es opcional.
+El módulo principal es `urbanstyle_textile_demo`. Declara como dependencias `base`, `mail`, `product`, `uom`, `stock`, `purchase`, `sale_management`, `mrp`, `mrp_workorder`, `quality_control` y `quality_mrp`. Odoo instala las dependencias al instalar el módulo. `point_of_sale` es opcional.
 
 Después de instalarlo, asigna grupos en **Ajustes → Usuarios y compañías → Usuarios → [usuario] → Derechos de acceso → UrbanStyle RD**. Guarda y vuelve a cargar Odoo para que se actualice el menú.
 
@@ -33,7 +39,7 @@ Los grupos heredan los permisos nativos correspondientes de Odoo; siguen aplicá
 3. Si el asistente indica que no hay almacén, crea primero un almacén para la compañía activa. También deben estar disponibles las unidades estándar **Metro** y **Unidad**.
 4. Abre el **Panel de control**. Desde ahí puedes entrar a indicadores, abrir Taller o volver a cargar la demostración.
 
-El asistente habilita rutas y dependencias entre operaciones, prepara el catálogo y sus variantes, carga el stock inicial, crea los centros y la BoM de la falda y deja una orden de fabricación en borrador.
+El asistente habilita las unidades de medida y las dependencias entre operaciones, prepara el catálogo y sus variantes, carga el stock inicial, crea los centros y deja kits y operaciones de demostración para las prendas. También deja una orden de fabricación de falda en borrador.
 
 ### Datos incluidos
 
@@ -41,21 +47,39 @@ El asistente habilita rutas y dependencias entre operaciones, prepara el catálo
 
 **Materias primas** (stock inicial y umbral de stock bajo):
 
-| Producto | Unidad | Stock inicial | Umbral |
-| --- | --- | ---: | ---: |
-| Tela de poliéster | m | 240 | 60 |
-| Tela de algodón | m | 180 | 45 |
-| Hilo de costura | m | 9.000 | 2.000 |
-| Cierres | unidad | 400 | 80 |
-| Botones | unidad | 1.600 | 300 |
-| Entretela | m | 140 | 35 |
-| Etiquetas de marca | unidad | 700 | 150 |
+| Producto | Unidad de inventario | Unidad de compra de ejemplo | Stock inicial | Umbral |
+| --- | --- | --- | ---: | ---: |
+| Tela de poliéster | m | yarda | 240 | 60 |
+| Tela de algodón | m | yarda | 180 | 45 |
+| Tela de mezclilla (denim) | m | yarda | 180 | 45 |
+| Hilo de costura | m | cono de 600 yd | 9.000 | 2.000 |
+| Cierres | unidad | unidad | 400 | 80 |
+| Botones | unidad | docena | 1.600 | 300 |
+| Entretela | m | yarda | 140 | 35 |
+| Etiquetas de marca | unidad | unidad | 700 | 150 |
 
-**Prendas:** Falda plisada clásica, Camiseta básica y Pantalón recto. Cada plantilla tiene variantes nativas de talla **XS, S, M, L, XL** y color **Negro, Blanco, Beige, Azul**. La carga asigna precios de venta de 1.890, 890 y 2.190, respectivamente, en la moneda de la compañía. La orden de fabricación de ejemplo usa la falda **M / Negro**.
+### Medidas prácticas para materiales textiles en RD
+
+La tela se cotiza habitualmente por **yarda**; la anchura del rollo se informa aparte en pulgadas. En Odoo, conviene llevar la tela en **metros** para controlar cortes y consumos con decimales, y comprarla en yardas: una yarda equivale a **0,9144 m**. El campo **Ancho de tela (pulgadas)** conserva la especificación del rollo sin confundir anchura con longitud de inventario.
+
+El hilo para costura industrial suele adquirirse por **cono**, pero su longitud cambia según proveedor y referencia. Se controla el inventario y la receta en metros; la unidad de compra debe indicar el metraje real del cono. El ejemplo de UrbanStyle usa **600 yardas por cono** (548,64 m), una presentación que aparece en una guía de costos de la DGCP. Confirma siempre el metraje de la etiqueta del proveedor antes de usar esa conversión.
+
+Los botones pueden cotizarse por **unidad** o por una presentación comercial como **docena**, gruesa o caja; se consumen por **unidad**. El ejemplo usa docena para compra e inventario unitario. Registra el costo y la presentación de cada proveedor.
+
+Estas son recomendaciones prácticas, no una norma única para todos los suplidores: los documentos de compras públicas dominicanos muestran telas por yardas, conos de hilo y botones por docena; el negocio puede configurar cada referencia según su proveedor. Fuentes de referencia: [guía de costos para MIPYMES de la DGCP](https://www.dgcp.gob.do/new_dgcp/documentos/fomen/Guia%20sobre%20como%20venderle%20al%20Estado.pdf), [ejemplo dominicano de compra de telas, conos y botones](https://comunidad.comprasdominicana.gob.do/Public/Tendering/OpportunityDetail/Index?noticeUID=DO1.NTC.660051) y [equivalencia yarda/metro en Odoo 19](https://www.odoo.com/documentation/19.0/es/applications/inventory_and_mrp/inventory/product_management/configure/uom.html).
+
+**Prendas:** Falda plisada clásica, Camiseta básica, Pantalón recto y Jean clásico. Cada plantilla tiene variantes nativas de talla **XS, S, M, L, XL** y color **Negro, Blanco, Beige, Azul**. Cada prenda incluye un kit y operaciones de inicio que se pueden editar para ajustarlos al patrón real. Las cantidades y tiempos son ejemplos demostrativos, no una ficha técnica de producción aprobada. Las unidades de venta se crean por defecto como **paquete de 10** y **caja de 40**, y el negocio puede definir otras cantidades. La orden de fabricación de ejemplo usa la falda **M / Negro**.
 
 **Centros de trabajo:** Área de corte, Área de plisado, Área de costura, Área de bordado, Área de acabados y Área de inspección. Cada uno tiene tiempos, eficiencia, capacidad y costo por hora configurados y se puede editar.
 
-**BoM de una Falda plisada clásica:** 1,60 m de tela de poliéster, 60 m de hilo, 1 cierre, 0,20 m de entretela y 1 etiqueta.
+**Kits de inicio por prenda:**
+
+- **Falda plisada clásica:** 1,60 m de poliéster, 60 m de hilo, 1 cierre, 0,20 m de entretela y 1 etiqueta.
+- **Camiseta básica:** 1,25 m de algodón, 45 m de hilo y 1 etiqueta.
+- **Pantalón recto:** 1,65 m de algodón, 65 m de hilo, 1 cierre, 1 botón, 0,15 m de entretela y 1 etiqueta.
+- **Jean clásico:** 1,80 m de denim, 80 m de hilo, 1 cierre, 1 botón, 0,25 m de entretela y 1 etiqueta.
+
+Confirma los consumos y tiempos con el patrón y el método de producción del negocio antes de usar los precios calculados en ventas reales.
 
 **Operaciones en secuencia:**
 
@@ -90,11 +114,11 @@ Los cambios posteriores en una operación de BoM no alteran retroactivamente las
 ## 5. Compras y recepción con calidad
 
 1. En **Compras**, crea una solicitud de presupuesto y selecciona uno de los proveedores.
-2. Añade las materias primas, cantidades y unidades. El catálogo usa metros para telas e hilo y unidades para cierres, botones y etiquetas.
+2. Añade las materias primas, cantidades y unidades. Los proveedores demo proponen yardas para telas y entretela, un cono de hilo de 600 yardas, docenas para botones y unidades para cierres y etiquetas. Cada proveedor puede usar su propia unidad de compra; la unidad de inventario sigue siendo metros para tejidos/hilo y unidades para accesorios.
 3. Confirma la compra y abre la recepción generada por Odoo.
 4. En la recepción, completa las comprobaciones de calidad que aparezcan para las materias primas y valida la transferencia cuando corresponda.
 
-La recepción es un flujo nativo: el asistente crea el punto de control, pero no simula ni valida compras. Para aprovisionar los datos de ejemplo sin una compra, usa la existencia inicial cargada. Volver a ejecutar el asistente no repone cantidades consumidas; usa una compra o un ajuste de inventario de Odoo.
+La recepción convierte automáticamente la cantidad comprada a la unidad de inventario del producto. Por ejemplo, recibir 2 yardas suma 1,8288 m de tela; recibir un cono del ejemplo suma 548,64 m de hilo; recibir una docena suma 12 botones. Ajusta la unidad del proveedor si el rollo, cono, caja o docena tiene otra cantidad. El asistente crea el punto de control, pero no simula ni valida compras. Volver a cargar la demo no repone cantidades consumidas; usa una compra o un ajuste de inventario de Odoo.
 
 ## 6. Controles de calidad y defectos
 
@@ -105,7 +129,8 @@ Marca **Aprobado** o **Rechazado** y registra observaciones según el flujo nati
 ## 7. Inventario y ventas
 
 - **Inventario:** el menú UrbanStyle abre las existencias. Las materias primas tienen un umbral propio; al bajar de él, el tablero las cuenta como stock bajo. La cantidad disponible se consulta en la compañía activa.
-- **Ventas:** el administrador puede crear una cotización con la variante deseada, confirmarla y procesar la entrega desde el flujo estándar de Ventas e Inventario.
+- **Ventas:** en una línea de cotización elige la presentación en el campo Unidad: unidad, paquete o caja. La cantidad se convierte a unidades base; vender 2 cajas de 40 genera una demanda de 80 prendas. Al validar la entrega, Odoo descuenta esa cantidad del inventario. Confirmar una cotización reserva la demanda según las reglas de stock; la existencia física se reduce al validar la salida. La carga de demostración activa las unidades de medida para que esas presentaciones estén disponibles en ventas.
+- **Precio:** el precio unitario se actualiza con costo de materiales + mano de obra estimada en cada centro de trabajo + margen. El margen inicial es 30% sobre el costo y se puede cambiar por prenda en **Fabricación**. La materia prima se costea con su campo **Costo unitario** (costo estándar); actualízalo cuando cambie el costo que quieres usar en la receta. Si alguien edita manualmente el precio de venta, se desactiva su actualización automática para esa prenda.
 - **Punto de Venta (opcional):** instala `point_of_sale` antes de ejecutar el asistente. Si está instalado, el asistente habilita las prendas terminadas para POS y les asigna la categoría **UrbanStyle RD**. Si se instala POS más tarde, vuelve a ejecutar el asistente.
 
 ## 8. Qué muestra el tablero
@@ -122,7 +147,13 @@ Pulsa cada indicador para abrir los registros relacionados. Los valores pueden c
 
 ## 9. Crear y mantener registros en vivo
 
-Las opciones **Productos textiles** y **Materias primas** usan los formularios normales de producto. Para que un producto nuevo aparezca en esas listas, activa **Prenda terminada UrbanStyle** o **Materia prima textil**; para los insumos, define además la existencia mínima. Las variantes de talla y color se administran desde los atributos nativos del producto.
+Las opciones **Productos textiles** y **Materias primas** abren fichas enfocadas en el flujo UrbanStyle. Al crear desde cada lista, el producto queda clasificado automáticamente como prenda o materia prima y se configura para controlar existencias. La ficha muestra solo los datos de identificación, inventario, compra, fabricación, variantes y venta que aplican a esa clase de artículo. Las variantes de talla y color se administran en **Variantes**. En materias primas, registra el costo unitario, unidad base, existencia mínima y proveedores; selecciona también la unidad de compra en la fila de cada suplidor cuando sus presentaciones sean distintas.
+
+Al crear una prenda desde **Productos textiles**, el sistema prepara su kit automáticamente. Abre **Fabricación**, entra al kit y define los materiales, la cantidad por prenda y la unidad de consumo; después añade operaciones con centro de trabajo y duración. El kit debe incluir al menos un material y una operación válida. No se puede confirmar una orden de fabricación ni una venta UrbanStyle con un kit incompleto. Para el precio automático, cada centro incluido en las operaciones debe tener un costo por hora mayor que cero. Al crear una orden de fabricación y seleccionar la prenda, Odoo propone automáticamente el kit y escala las cantidades al lote.
+
+El precio se actualiza al cambiar la cantidad o el costo unitario de un material, las operaciones/tiempos o el costo por hora de un área. Los tiempos se estiman con la duración planificada de las operaciones; registra los costos por hora de corte, costura, acabados y las demás áreas en **Centros de trabajo**. El cálculo es **precio = (materiales + mano de obra estimada) × (1 + margen / 100)**. El margen se aplica como recargo sobre el costo, no incluye impuestos, gastos financieros ni descuentos comerciales. El precio de compra registrado en la fila del suplidor es una referencia de compra; el cálculo utiliza el **Costo unitario** de inventario de cada materia prima.
+
+Define las presentaciones de venta en **Unidades por paquete** y **Unidades por caja**. La unidad base de la prenda debe ser **Unidad**, es decir, una prenda individual; por defecto se crean paquete x10 y caja x40. La caja debe ser múltiplo del paquete para mantener una configuración ordenada. Los valores aplican a todas las variantes del mismo producto; cada producto puede tener sus propios tamaños de paquete y caja.
 
 Producción puede crear y editar BoM, centros, operaciones y órdenes desde los menús UrbanStyle. En una operación, activa **¿Es operación de plisado?** para mostrar las especificaciones textiles. Los formularios normales de Odoo conservan sus acciones estándar para guardar, archivar y consultar registros.
 
@@ -148,7 +179,7 @@ La carga es repetible para completar lo que falte, pero no es una herramienta pa
 
 Principal: `urbanstyle_textile_demo`.
 
-  Dependencias directas: `base`, `mail`, `product`, `stock`, `purchase`, `sale_management`, `mrp`, `mrp_workorder`, `quality_control`, `quality_mrp`.
+  Dependencias directas: `base`, `mail`, `product`, `uom`, `stock`, `purchase`, `sale_management`, `mrp`, `mrp_workorder`, `quality_control`, `quality_mrp`.
 
 Opcional: `point_of_sale`.
 
