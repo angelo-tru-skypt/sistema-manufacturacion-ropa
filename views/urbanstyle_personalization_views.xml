@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_urbanstyle_print_design_list" model="ir.ui.view">
+        <field name="name">urbanstyle.print.design.list</field>
+        <field name="model">urbanstyle.print.design</field>
+        <field name="arch" type="xml">
+            <list string="Diseños y estampados">
+                <field name="name"/>
+                <field name="reference" optional="show"/>
+                <field name="technique"/>
+                <field name="specialty_ids" widget="many2many_tags" optional="show"/>
+                <field name="extra_cost"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_urbanstyle_print_design_form" model="ir.ui.view">
+        <field name="name">urbanstyle.print.design.form</field>
+        <field name="model">urbanstyle.print.design</field>
+        <field name="arch" type="xml">
+            <form string="Diseño o estampado">
+                <sheet>
+                    <field name="active" invisible="1"/>
+                    <field name="image_1920" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name" string="Nombre del diseño"/>
+                        <h1><field name="name" placeholder="Ej. Estampado floral personalizado"/></h1>
+                    </div>
+                    <group>
+                        <group string="Diseño y precio">
+                            <field name="reference"/>
+                            <field name="technique"/>
+                            <field name="extra_cost"/>
+                            <field name="currency_id"/>
+                        </group>
+                        <group string="Proceso de personalización">
+                            <field name="specialty_ids" widget="many2many_tags"/>
+                            <field name="description" placeholder="Colores, ubicación, tamaño o instrucciones para producción..."/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_urbanstyle_customization_specialty_list" model="ir.ui.view">
+        <field name="name">urbanstyle.customization.specialty.list</field>
+        <field name="model">urbanstyle.customization.specialty</field>
+        <field name="arch" type="xml">
+            <list string="Especializaciones de personalización">
+                <field name="name"/>
+                <field name="code" optional="show"/>
+                <field name="description" optional="hide"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_urbanstyle_customization_specialty_form" model="ir.ui.view">
+        <field name="name">urbanstyle.customization.specialty.form</field>
+        <field name="model">urbanstyle.customization.specialty</field>
+        <field name="arch" type="xml">
+            <form string="Especialización de personalización">
+                <sheet>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name" string="Especialización"/>
+                        <h1><field name="name" placeholder="Ej. Bordado de prendas"/></h1>
+                    </div>
+                    <group>
+                        <field name="code"/>
+                        <field name="description" placeholder="Habilidades y tareas que abarca esta especialización..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sale_order_form_urbanstyle_personalization" model="ir.ui.view">
+        <field name="name">sale.order.form.urbanstyle.personalization</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/form" position="inside">
+                <field name="currency_id" invisible="1"/>
+                <field name="urbanstyle_is_finished_product" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/form//field[@name='tax_ids']" position="after">
+                <group string="Personalización de prenda" invisible="not urbanstyle_is_finished_product">
+                    <field name="urbanstyle_print_design_id" options="{'no_create': True}"
+                        readonly="parent.state not in ['draft', 'sent']"/>
+                    <field name="urbanstyle_design_surcharge" readonly="1"/>
+                    <field name="urbanstyle_customization_specialty_ids" widget="many2many_tags"
+                        readonly="parent.state not in ['draft', 'sent']"/>
+                    <field name="urbanstyle_customization_notes"
+                        readonly="parent.state not in ['draft', 'sent']"
+                        placeholder="Ubicación, tamaño, colores y otras instrucciones para la prenda..."/>
+                </group>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/list" position="inside">
+                <field name="urbanstyle_is_finished_product" column_invisible="True"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/list/field[@name='price_unit']" position="after">
+                <field name="urbanstyle_print_design_id" string="Diseño" optional="show"
+                    invisible="not urbanstyle_is_finished_product"
+                    readonly="parent.state not in ['draft', 'sent']"/>
+                <field name="urbanstyle_design_surcharge" string="Recargo diseño" optional="show"
+                    invisible="not urbanstyle_is_finished_product"/>
+                <field name="urbanstyle_customization_specialty_ids" string="Especializaciones"
+                    widget="many2many_tags" optional="hide"
+                    invisible="not urbanstyle_is_finished_product"
+                    readonly="parent.state not in ['draft', 'sent']"/>
+                <field name="urbanstyle_customization_notes" optional="hide"
+                    invisible="not urbanstyle_is_finished_product"
+                    readonly="parent.state not in ['draft', 'sent']"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="attributes">
+                <attribute name="readonly">parent.state not in ['draft', 'sent'] or urbanstyle_print_design_id</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/list/field[@name='price_unit']" position="attributes">
+                <attribute name="readonly">parent.state not in ['draft', 'sent'] or urbanstyle_print_design_id</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_mrp_production_form_urbanstyle_personalization" model="ir.ui.view">
+        <field name="name">mrp.production.form.urbanstyle.personalization</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Personalización" name="urbanstyle_personalization">
+                    <group string="Solicitud del cliente">
+                        <field name="urbanstyle_print_design_id"
+                            readonly="state in ['done', 'cancel']"/>
+                        <field name="urbanstyle_customization_extra_cost"
+                            readonly="state in ['done', 'cancel']"/>
+                        <field name="urbanstyle_customization_specialty_ids" widget="many2many_tags"
+                            readonly="state in ['done', 'cancel']"/>
+                        <field name="urbanstyle_customization_notes"
+                            readonly="state in ['done', 'cancel']"
+                            placeholder="Instrucciones para impresión, bordado o acabado..."/>
+                    </group>
+                    <div class="text-muted">
+                        Cuando la orden se origina desde una venta, el diseño, el recargo y las especializaciones solicitadas se copian desde su línea.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

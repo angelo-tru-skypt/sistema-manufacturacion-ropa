@@ -11,8 +11,31 @@
         <field name="name">Materias primas</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="urbanstyle_raw_material_search"/>
         <field name="domain">[('urbanstyle_is_raw_material', '=', True)]</field>
         <field name="context">{'default_urbanstyle_is_raw_material': True, 'default_is_storable': True, 'default_sale_ok': False, 'default_purchase_ok': True}</field>
+    </record>
+    <record id="action_urbanstyle_stock_products" model="ir.actions.act_window">
+        <field name="name">Productos UrbanStyle en stock</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_storable', '=', True), ('qty_available', '&gt;', 0), '|', ('product_tmpl_id.urbanstyle_is_raw_material', '=', True), ('product_tmpl_id.urbanstyle_is_finished_product', '=', True)]</field>
+    </record>
+    <record id="action_urbanstyle_textile_calculator" model="ir.actions.act_window">
+        <field name="name">Calculadora textil</field>
+        <field name="res_model">urbanstyle.textile.calculator</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+    <record id="action_urbanstyle_print_designs" model="ir.actions.act_window">
+        <field name="name">Diseños y estampados</field>
+        <field name="res_model">urbanstyle.print.design</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_urbanstyle_customization_specialties" model="ir.actions.act_window">
+        <field name="name">Especializaciones de personalización</field>
+        <field name="res_model">urbanstyle.customization.specialty</field>
+        <field name="view_mode">list,form</field>
     </record>
     <record id="action_urbanstyle_boms" model="ir.actions.act_window">
         <field name="name">Listas de materiales</field>
@@ -86,6 +109,12 @@
         <field name="view_id" ref="product_template_form_urbanstyle"/>
         <field name="act_window_id" ref="action_urbanstyle_raw_materials"/>
     </record>
+    <record id="action_urbanstyle_stock_products_list_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="urbanstyle_stock_product_list"/>
+        <field name="act_window_id" ref="action_urbanstyle_stock_products"/>
+    </record>
 
     <menuitem id="menu_urbanstyle_root" name="URBANSTYLE RD" sequence="5"
         groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator,urbanstyle_textile_demo.group_urbanstyle_quality_manager,urbanstyle_textile_demo.group_urbanstyle_warehouse"/>
@@ -93,7 +122,7 @@
         action="action_urbanstyle_dashboard" sequence="5"/>
     <menuitem id="menu_urbanstyle_products" name="Productos textiles" parent="menu_urbanstyle_root"
         action="action_urbanstyle_products" sequence="10"/>
-    <menuitem id="menu_urbanstyle_raw_materials" name="Materias primas" parent="menu_urbanstyle_root"
+    <menuitem id="menu_urbanstyle_raw_materials" name="Catálogo de materiales" parent="menu_urbanstyle_root"
         action="action_urbanstyle_raw_materials" sequence="25"/>
     <menuitem id="menu_urbanstyle_boms" name="Listas de materiales" parent="menu_urbanstyle_root"
         action="action_urbanstyle_boms" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager" sequence="40"/>
@@ -117,8 +146,18 @@
         action="stock.stock_quant_action" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator,urbanstyle_textile_demo.group_urbanstyle_warehouse" sequence="15"/>
     <menuitem id="menu_urbanstyle_purchases" name="Compras" parent="menu_urbanstyle_root"
         action="action_urbanstyle_purchase_orders" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_warehouse" sequence="20"/>
+    <menuitem id="menu_urbanstyle_textile_calculator" name="Calculadora textil" parent="menu_urbanstyle_root"
+        action="action_urbanstyle_textile_calculator" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator,urbanstyle_textile_demo.group_urbanstyle_warehouse" sequence="28"/>
     <menuitem id="menu_urbanstyle_suppliers" name="Proveedores" parent="menu_urbanstyle_root"
         action="action_urbanstyle_suppliers" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_warehouse" sequence="30"/>
+    <menuitem id="menu_urbanstyle_stock_products" name="Productos en stock" parent="menu_urbanstyle_root"
+        action="action_urbanstyle_stock_products" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator,urbanstyle_textile_demo.group_urbanstyle_warehouse" sequence="32"/>
+    <menuitem id="menu_urbanstyle_personalization" name="Personalización" parent="menu_urbanstyle_root"
+        groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager" sequence="33"/>
+    <menuitem id="menu_urbanstyle_print_designs" name="Diseños y estampados" parent="menu_urbanstyle_personalization"
+        action="action_urbanstyle_print_designs" sequence="5"/>
+    <menuitem id="menu_urbanstyle_customization_specialties" name="Especializaciones"
+        parent="menu_urbanstyle_personalization" action="action_urbanstyle_customization_specialties" sequence="10"/>
     <menuitem id="menu_urbanstyle_sales" name="Ventas" parent="menu_urbanstyle_root"
         action="action_urbanstyle_sales" groups="urbanstyle_textile_demo.group_urbanstyle_admin" sequence="65"/>
     <menuitem id="menu_urbanstyle_configuration" name="Configuración" parent="menu_urbanstyle_root"

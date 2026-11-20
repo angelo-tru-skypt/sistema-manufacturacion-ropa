@@ -93,6 +93,11 @@
                             <group>
                                 <group string="Especificación textil">
                                     <field name="urbanstyle_material_kind"/>
+                                    <field name="urbanstyle_composition" placeholder="Ej. 65% poliéster, 35% algodón"/>
+                                    <field name="urbanstyle_texture" placeholder="Ej. jersey, sarga o satén"/>
+                                    <field name="urbanstyle_material_color" placeholder="Ej. azul marino"/>
+                                    <field name="urbanstyle_weight_gsm"/>
+                                    <field name="urbanstyle_usage"/>
                                     <field name="urbanstyle_fabric_width_in"
                                         invisible="urbanstyle_material_kind != 'fabric'"/>
                                     <field name="urbanstyle_min_stock"/>
@@ -142,10 +147,65 @@
                 <field name="name"/>
                 <field name="default_code" optional="show"/>
                 <field name="urbanstyle_material_kind"/>
+                <field name="urbanstyle_composition" optional="show"/>
+                <field name="urbanstyle_texture" optional="show"/>
+                <field name="urbanstyle_material_color" optional="show"/>
+                <field name="urbanstyle_weight_gsm" optional="show"/>
+                <field name="urbanstyle_usage" optional="hide"/>
+                <field name="urbanstyle_fabric_width_in" optional="hide"/>
                 <field name="uom_id" string="Unidad de inventario"/>
                 <field name="standard_price" string="Costo unitario"/>
                 <field name="urbanstyle_min_stock"/>
                 <field name="urbanstyle_low_stock" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="urbanstyle_raw_material_search" model="ir.ui.view">
+        <field name="name">product.template.search.urbanstyle.raw.material</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <search string="Catálogo de materiales textiles">
+                <field name="name"/>
+                <field name="default_code"/>
+                <field name="urbanstyle_material_kind"/>
+                <field name="urbanstyle_composition"/>
+                <field name="urbanstyle_texture"/>
+                <field name="urbanstyle_material_color" string="Color"/>
+                <field name="urbanstyle_weight_gsm" string="Peso (g/m²)"/>
+                <field name="urbanstyle_usage"/>
+                <separator/>
+                <filter name="textile_fabrics" string="Telas y tejidos"
+                    domain="[('urbanstyle_material_kind', '=', 'fabric')]"/>
+                <filter name="materials_low_stock" string="Stock bajo"
+                    domain="[('urbanstyle_low_stock', '=', True)]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_material_kind" string="Tipo de material"
+                        context="{'group_by': 'urbanstyle_material_kind'}"/>
+                    <filter name="group_material_usage" string="Utilización"
+                        context="{'group_by': 'urbanstyle_usage'}"/>
+                    <filter name="group_material_texture" string="Textura"
+                        context="{'group_by': 'urbanstyle_texture'}"/>
+                    <filter name="group_material_color" string="Color"
+                        context="{'group_by': 'urbanstyle_material_color'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="urbanstyle_stock_product_list" model="ir.ui.view">
+        <field name="name">product.product.list.urbanstyle.stock</field>
+        <field name="model">product.product</field>
+        <field name="arch" type="xml">
+            <list string="Productos UrbanStyle con existencias">
+                <field name="display_name" string="Producto"/>
+                <field name="default_code" optional="show"/>
+                <field name="product_template_attribute_value_ids" widget="many2many_tags" optional="hide"/>
+                <field name="product_tmpl_id" column_invisible="True"/>
+                <field name="qty_available" string="Existencia" sum="Total en stock"/>
+                <field name="free_qty" string="Disponible" sum="Total disponible"/>
+                <field name="virtual_available" string="Pronosticado" optional="hide"/>
+                <field name="uom_id" string="Unidad" groups="uom.group_uom"/>
             </list>
         </field>
     </record>

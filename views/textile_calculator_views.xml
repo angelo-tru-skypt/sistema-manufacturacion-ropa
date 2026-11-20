@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_urbanstyle_textile_calculator_form" model="ir.ui.view">
+        <field name="name">urbanstyle.textile.calculator.form</field>
+        <field name="model">urbanstyle.textile.calculator</field>
+        <field name="arch" type="xml">
+            <form string="Calculadora textil">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="project_name" placeholder="Ej. Camiseta para pedido especial"/></h1>
+                    </div>
+                    <group string="Filtrar telas">
+                        <group>
+                            <field name="filter_composition" placeholder="Algodón, poliéster..."/>
+                            <field name="filter_texture" placeholder="Jersey, sarga, satén..."/>
+                            <field name="filter_color" placeholder="Azul, negro, blanco..."/>
+                        </group>
+                        <group>
+                            <field name="filter_usage"/>
+                            <field name="filter_weight_min_gsm"/>
+                            <field name="filter_weight_max_gsm"/>
+                        </group>
+                    </group>
+                    <field name="eligible_material_ids" invisible="1"/>
+                    <group string="Material y medidas">
+                        <group>
+                            <field name="material_id" required="1" options="{'no_create': True}"/>
+                            <field name="quantity"/>
+                            <field name="waste_percent"/>
+                        </group>
+                        <group string="Dimensiones por pieza">
+                            <field name="project_length_cm"/>
+                            <field name="project_width_cm"/>
+                        </group>
+                    </group>
+                    <group string="Estimación de consumo">
+                        <field name="fabric_width_cm" readonly="1"/>
+                        <field name="estimated_area_m2" readonly="1"/>
+                        <field name="estimated_linear_m" readonly="1"/>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        Estimación aproximada: suma el área de las piezas rectangulares, aplica el desperdicio indicado y la divide entre el ancho del rollo. El patronaje, las curvas, las tallas y la disposición del corte pueden cambiar el consumo real. Registra el ancho del rollo en la ficha de la tela.
+                    </div>
+                </sheet>
+                <footer>
+                    <button string="Cerrar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

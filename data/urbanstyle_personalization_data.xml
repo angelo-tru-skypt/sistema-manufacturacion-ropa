@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="specialty_screen_print" model="urbanstyle.customization.specialty">
+            <field name="name">Serigrafía</field>
+            <field name="code">SERIGRAFIA</field>
+        </record>
+        <record id="specialty_sublimation" model="urbanstyle.customization.specialty">
+            <field name="name">Sublimación</field>
+            <field name="code">SUBLIMACION</field>
+        </record>
+        <record id="specialty_vinyl_transfer" model="urbanstyle.customization.specialty">
+            <field name="name">Vinilo y transfer</field>
+            <field name="code">VINILO</field>
+        </record>
+        <record id="specialty_embroidery" model="urbanstyle.customization.specialty">
+            <field name="name">Bordado</field>
+            <field name="code">BORDADO</field>
+        </record>
+        <record id="specialty_applique" model="urbanstyle.customization.specialty">
+            <field name="name">Aplicación y parche</field>
+            <field name="code">APLIQUE</field>
+        </record>
+        <record id="specialty_digital_design" model="urbanstyle.customization.specialty">
+            <field name="name">Diseño gráfico personalizado</field>
+            <field name="code">DISENO-GRAFICO</field>
+        </record>
+    </data>
+</odoo>

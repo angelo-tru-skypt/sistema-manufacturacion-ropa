@@ -300,6 +300,12 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
                 "supplier": "Textiles del Caribe",
                 "purchase_uom": yard,
                 "material_kind": "fabric",
+                "composition": "100% poliéster",
+                "texture": "Tejido plano",
+                "color": "Surtido",
+                "weight_gsm": 180.0,
+                "fabric_width_in": 58.0,
+                "usage": "uniforms",
             },
             {
                 "name": "Tela de algodón",
@@ -312,6 +318,12 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
                 "supplier": "Distribuidora Textil RD",
                 "purchase_uom": yard,
                 "material_kind": "fabric",
+                "composition": "100% algodón",
+                "texture": "Jersey",
+                "color": "Blanco natural",
+                "weight_gsm": 160.0,
+                "fabric_width_in": 60.0,
+                "usage": "tshirts",
             },
             {
                 "name": "Tela de mezclilla (denim)",
@@ -324,6 +336,12 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
                 "supplier": "Textiles del Caribe",
                 "purchase_uom": yard,
                 "material_kind": "fabric",
+                "composition": "100% algodón",
+                "texture": "Sarga denim",
+                "color": "Azul índigo",
+                "weight_gsm": 320.0,
+                "fabric_width_in": 58.0,
+                "usage": "pants",
             },
             {
                 "name": "Hilo de costura",
@@ -405,6 +423,12 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
                     "urbanstyle_is_raw_material": True,
                     "urbanstyle_is_finished_product": False,
                     "urbanstyle_material_kind": spec["material_kind"],
+                    "urbanstyle_composition": spec.get("composition"),
+                    "urbanstyle_texture": spec.get("texture"),
+                    "urbanstyle_material_color": spec.get("color"),
+                    "urbanstyle_weight_gsm": spec.get("weight_gsm", 0.0),
+                    "urbanstyle_fabric_width_in": spec.get("fabric_width_in", 0.0),
+                    "urbanstyle_usage": spec.get("usage"),
                     "urbanstyle_min_stock": spec["minimum"],
                     "seller_ids": [
                         Command.create(
@@ -429,7 +453,19 @@ class UrbanStyleDemoDataWizard(models.TransientModel):
             )
             raw_materials[spec["name"]] = template
             if not created:
-                template.write({"urbanstyle_material_kind": spec["material_kind"]})
+                metadata_values = {"urbanstyle_material_kind": spec["material_kind"]}
+                for field_name, spec_key in (
+                    ("urbanstyle_composition", "composition"),
+                    ("urbanstyle_texture", "texture"),
+                    ("urbanstyle_material_color", "color"),
+                    ("urbanstyle_weight_gsm", "weight_gsm"),
+                    ("urbanstyle_fabric_width_in", "fabric_width_in"),
+                    ("urbanstyle_usage", "usage"),
+                ):
+                    value = spec.get(spec_key)
+                    if value and not template[field_name]:
+                        metadata_values[field_name] = value
+                template.write(metadata_values)
                 for seller in template.seller_ids.filtered(lambda line: line.partner_id == supplier):
                     source_uom = seller.product_uom_id or template.uom_id
                     price_per_inventory_unit = source_uom._compute_price(seller.price, template.uom_id)
