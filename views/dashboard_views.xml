@@ -8,6 +8,8 @@
                 <header>
                     <button name="action_open_demo_wizard" type="object" string="Cargar datos de demostración" class="btn-primary" groups="urbanstyle_textile_demo.group_urbanstyle_admin"/>
                     <button name="action_open_shop_floor" type="object" string="Abrir Taller (Shop Floor)" class="btn-secondary" groups="mrp_workorder.group_mrp_wo_shop_floor"/>
+                    <button name="action_open_inventory" type="object" string="Abrir inventario" class="btn-secondary" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator,urbanstyle_textile_demo.group_urbanstyle_warehouse"/>
+                    <button name="action_open_purchase_orders" type="object" string="Abrir compras" class="btn-secondary" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_warehouse"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -51,11 +53,12 @@
                             </div>
                         </button>
                     </div>
-                    <group string="Producción acumulada">
+                    <group string="Catálogo y producción">
+                        <field name="finished_product_count" readonly="1"/>
                         <field name="produced_units" readonly="1"/>
                     </group>
                     <div class="text-muted">
-                        Indicadores conectados a órdenes, controles de calidad y existencias reales de la compañía activa.
+                        Los modelos cuentan las prendas del catálogo. Las unidades fabricadas se actualizan al completar órdenes de fabricación.
                     </div>
                 </sheet>
             </form>

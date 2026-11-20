@@ -9,8 +9,11 @@ class UrbanStyleDashboard(models.Model):
     manufacturing_pending = fields.Integer(compute="_compute_kpis", string="Órdenes pendientes")
     manufacturing_in_progress = fields.Integer(compute="_compute_kpis", string="Órdenes en producción")
     manufacturing_done = fields.Integer(compute="_compute_kpis", string="Órdenes completadas")
+    finished_product_count = fields.Integer(
+        compute="_compute_kpis", string="Modelos de prendas"
+    )
     produced_units = fields.Float(
-        compute="_compute_kpis", string="Prendas fabricadas", digits="Product Unit"
+        compute="_compute_kpis", string="Unidades fabricadas", digits="Product Unit"
     )
     quality_checks_pending = fields.Integer(compute="_compute_kpis", string="Controles pendientes")
     raw_materials_low = fields.Integer(compute="_compute_kpis", string="Materias primas con stock bajo")
@@ -24,6 +27,9 @@ class UrbanStyleDashboard(models.Model):
         QualityCheck = self.env["quality.check"]
         ProductTemplate = self.env["product.template"]
 
+        finished_product_count = ProductTemplate.search_count(
+            [("urbanstyle_is_finished_product", "=", True)]
+        )
         pending = Production.search_count([("state", "=", "confirmed")])
         in_progress = Production.search_count([("state", "=", "progress")])
         done_orders = Production.search([("state", "=", "done")])
@@ -49,6 +55,7 @@ class UrbanStyleDashboard(models.Model):
         )
 
         for dashboard in self:
+            dashboard.finished_product_count = finished_product_count
             dashboard.manufacturing_pending = pending
             dashboard.manufacturing_in_progress = in_progress
             dashboard.manufacturing_done = len(done_orders)
@@ -115,6 +122,14 @@ class UrbanStyleDashboard(models.Model):
 
     def action_open_shop_floor(self):
         return self.env["ir.actions.actions"]._for_xml_id("mrp_workorder.mrp_workorder_action_tablet")
+
+    def action_open_inventory(self):
+        return self.env["ir.actions.actions"]._for_xml_id("stock.stock_quant_action")
+
+    def action_open_purchase_orders(self):
+        return self.env["ir.actions.actions"]._for_xml_id(
+            "urbanstyle_textile_demo.action_urbanstyle_purchase_orders"
+        )
 
     def action_open_demo_wizard(self):
         return {

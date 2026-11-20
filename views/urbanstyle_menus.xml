@@ -94,31 +94,31 @@
     <menuitem id="menu_urbanstyle_products" name="Productos textiles" parent="menu_urbanstyle_root"
         action="action_urbanstyle_products" sequence="10"/>
     <menuitem id="menu_urbanstyle_raw_materials" name="Materias primas" parent="menu_urbanstyle_root"
-        action="action_urbanstyle_raw_materials" sequence="15"/>
+        action="action_urbanstyle_raw_materials" sequence="25"/>
     <menuitem id="menu_urbanstyle_boms" name="Listas de materiales" parent="menu_urbanstyle_root"
-        action="action_urbanstyle_boms" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager" sequence="20"/>
+        action="action_urbanstyle_boms" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager" sequence="40"/>
     <menuitem id="menu_urbanstyle_workcenters" name="Centros de trabajo" parent="menu_urbanstyle_root"
-        action="action_urbanstyle_workcenters" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager" sequence="25"/>
+        action="action_urbanstyle_workcenters" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager" sequence="45"/>
     <menuitem id="menu_urbanstyle_operations" name="Operaciones de fabricación" parent="menu_urbanstyle_root"
-        action="action_urbanstyle_operations" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager" sequence="30"/>
+        action="action_urbanstyle_operations" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager" sequence="50"/>
     <menuitem id="menu_urbanstyle_productions" name="Órdenes de fabricación" parent="menu_urbanstyle_root"
         action="action_urbanstyle_productions" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator" sequence="35"/>
     <menuitem id="menu_urbanstyle_workorders" name="Órdenes de trabajo" parent="menu_urbanstyle_root"
-        action="mrp.mrp_workorder_todo" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator" sequence="40"/>
+        action="mrp.mrp_workorder_todo" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator" sequence="55"/>
 
     <menuitem id="menu_urbanstyle_quality" name="Control de calidad" parent="menu_urbanstyle_root"
-        groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator,urbanstyle_textile_demo.group_urbanstyle_quality_manager" sequence="45"/>
+        groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator,urbanstyle_textile_demo.group_urbanstyle_quality_manager" sequence="60"/>
     <menuitem id="menu_urbanstyle_quality_checks" name="Comprobaciones" parent="menu_urbanstyle_quality"
         action="action_urbanstyle_quality_checks" sequence="5"/>
     <menuitem id="menu_urbanstyle_quality_points" name="Puntos de control" parent="menu_urbanstyle_quality"
         action="action_urbanstyle_quality_points" sequence="10"/>
 
     <menuitem id="menu_urbanstyle_inventory" name="Inventario" parent="menu_urbanstyle_root"
-        action="stock.stock_quant_action" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator,urbanstyle_textile_demo.group_urbanstyle_warehouse" sequence="50"/>
+        action="stock.stock_quant_action" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_operator,urbanstyle_textile_demo.group_urbanstyle_warehouse" sequence="15"/>
     <menuitem id="menu_urbanstyle_purchases" name="Compras" parent="menu_urbanstyle_root"
-        action="action_urbanstyle_purchase_orders" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_warehouse" sequence="55"/>
+        action="action_urbanstyle_purchase_orders" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_warehouse" sequence="20"/>
     <menuitem id="menu_urbanstyle_suppliers" name="Proveedores" parent="menu_urbanstyle_root"
-        action="action_urbanstyle_suppliers" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_warehouse" sequence="60"/>
+        action="action_urbanstyle_suppliers" groups="urbanstyle_textile_demo.group_urbanstyle_admin,urbanstyle_textile_demo.group_urbanstyle_production_manager,urbanstyle_textile_demo.group_urbanstyle_warehouse" sequence="30"/>
     <menuitem id="menu_urbanstyle_sales" name="Ventas" parent="menu_urbanstyle_root"
         action="action_urbanstyle_sales" groups="urbanstyle_textile_demo.group_urbanstyle_admin" sequence="65"/>
     <menuitem id="menu_urbanstyle_configuration" name="Configuración" parent="menu_urbanstyle_root"
